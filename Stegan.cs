@@ -11,29 +11,27 @@ namespace SteganForm
             InitializeComponent();
         }
 
-        void OpenPicture(PictureBox pictureBox)
+        static void OpenPicture(PictureBox pictureBox)
         {
             OpenFileDialog openFile = new();
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 Bitmap bitmap = new(openFile.FileName);
 
-                pictureBox.Image = bitmap;
+                pictureBox.Image = new Bitmap(bitmap, new Size(pictureBox.Width,pictureBox.Height));
+            }
+        }
+        static void OpenText(RichTextBox textBox)
+        {
+            OpenFileDialog openFile = new();
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                textBox.Text = System.IO.File.ReadAllText(openFile.FileName).ToLower();
             }
         }
         private void sourcePicture_Click(object sender, EventArgs e)
         {
             OpenPicture(sourcePicture);
-        }
-        void OpenHiddenPicture()
-        {
-            OpenFileDialog openFile = new();
-            if (openFile.ShowDialog() == DialogResult.OK)
-            {
-                Bitmap bitmap = new(openFile.FileName);
-
-                messagePicture.Image = bitmap;
-            }
         }
         private void messagePicture_Click(object sender, EventArgs e)
         {
@@ -42,13 +40,18 @@ namespace SteganForm
 
         private void hideButton_Click(object sender, EventArgs e)
         {
-            if (sourcePicture.Image != null && messagePicture.Image != null)
+            if (sourcePicture.Image != null )
             {
                 Steganografy steganografy = new();
 
                 try
                 {
-                    resultPicture.Image = steganografy.Message((Bitmap)sourcePicture.Image, (Bitmap)messagePicture.Image);
+                    if (rImage.Checked && messagePicture.Image != null)
+                        resultPicture.Image = steganografy.HideMessage((Bitmap)sourcePicture.Image, (Bitmap)messagePicture.Image);
+                    else
+                    {
+                        resultPicture.Image = steganografy.HideMessage((Bitmap)sourcePicture.Image, messageText.Text, (int)bitSize.Value);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -63,7 +66,12 @@ namespace SteganForm
 
             try
             {
-                hidenPicture.Image = steganografy.HiddenMessage((Bitmap)hidedPicture.Image);
+                if (sImage.Checked)
+                {
+                    hidenPicture.Image = steganografy.ShowMessage((Bitmap)hidedPicture.Image);
+                    
+                }
+                else resultText.Text = steganografy.ShowMessage((Bitmap)hidedPicture.Image, (int)bitSize.Value);
             }
             catch (Exception ex)
             {
@@ -71,14 +79,29 @@ namespace SteganForm
             }
         }
 
+        void CalcTextSize()
+        {
+            if(sourcePicture.Image != null)
+            {
+                int width = sourcePicture.Image.Width;
+                int height = sourcePicture.Image.Height;
+                int maxSize = (int)bitSize.Value * 3 * width * height / 6;
+                textSize.Maximum = maxSize + 1;
+                textSize.Value = maxSize;
+            }
+        }
         private void openSourceBtn_Click(object sender, EventArgs e)
         {
             OpenPicture(sourcePicture);
+
+            CalcTextSize();
         }
 
         private void openHidden_Click(object sender, EventArgs e)
         {
-            OpenHiddenPicture();
+            if (rImage.Checked)
+                OpenPicture(messagePicture);
+            else OpenText(messageText);
         }
 
         void SaveResultPicture()
@@ -100,6 +123,11 @@ namespace SteganForm
         private void openHiddenImage_Click(object sender, EventArgs e)
         {
             OpenPicture(hidedPicture);
+        }
+
+        private void bitSize_ValueChanged(object sender, EventArgs e)
+        {
+            CalcTextSize();
         }
     }
 }
