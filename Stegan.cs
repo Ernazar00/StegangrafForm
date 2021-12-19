@@ -18,7 +18,7 @@ namespace SteganForm
             {
                 Bitmap bitmap = new(openFile.FileName);
 
-                pictureBox.Image = new Bitmap(bitmap, new Size(pictureBox.Width,pictureBox.Height));
+                pictureBox.Image = new Bitmap(bitmap);
             }
         }
         static void OpenText(RichTextBox textBox)

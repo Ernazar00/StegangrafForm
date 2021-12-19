@@ -176,7 +176,7 @@ namespace SteganForm
 
                         int symbol_index = pixel_index * size * 3 + k;
 
-                        if (symbol_index >= symbolArray.Count) 
+                        if (symbol_index + size * 2 > symbolArray.Count) 
                         {
                             rSourse[k] = false;
                             gSourse[k] = false;
@@ -224,6 +224,7 @@ namespace SteganForm
                     for (int k = 0; k < size; k++)
                     {
                         int pixel_index = i * width + j;
+
                         if (pixel_index * size * 3 + k + 2 * size < symbolArray.Count)
                         {
                             symbolArray[pixel_index * size * 3 + k + size * 0] = rSourse[k];
